@@ -12,9 +12,9 @@ program elliptic
 	print '("Enter the field (must be a prime not equal to 2 or 3)")',
 	read *, p
 
-	allocate(points_x(p+1))
-	allocate(points_y(p+1))
-	allocate(points_z(p+1))
+	allocate(points_x(2*p+1))
+	allocate(points_y(2*p+1))
+	allocate(points_z(2*p+1))
 
 	if (p==2 .or. p==3) then
 		print '("Error: Field cannot be over 2 or 3")',
@@ -26,6 +26,8 @@ program elliptic
 	print '("Enter the coefficients of the Elliptic curve: y^2 = x^3 + ax + b")',
 	print '("Enter a and b:")',
 	read *,a,b
+	!print '("Enter a:")'
+	!read *,a
 	!print '("Now enter b:")'
 	!read *,b
 
@@ -35,23 +37,25 @@ program elliptic
 	end if
 
 	! Generate points
-	points_x(0) = 0
-	points_y(0) = 1
-	points_z(0) = 0
+	points_x(1) = 0
+	points_y(1) = 1
+	points_z(1) = 0
 	print '("List of points:")',
 	numPoints = 1
 	print '(I0,": (",I0,",",I0,",",I0,")")', numPoints, 0, 1, 0
 	do i=0, p-1
 		do j=0, p-1
 			if (MOD(i*i,p) == MOD(j*j*j+a*j + b,p)) then
+				numPoints = numPoints+1
 				points_x(numPoints) = j
 				points_y(numPoints) = i
 				points_z(numPoints) = 1
-				numPoints = numPoints+1
 				print '(I0,": (",I0,",",I0,",",I0,")")', numPoints, j, i, 1
 			end if
 		end do
 	end do
+
+	print '("done")'
 
 	print '("Total number of points: ",I0)', numPoints
 
