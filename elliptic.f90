@@ -44,34 +44,8 @@ program elliptic
 				points_y(i) = -1
 			end if
 		end do
-		!root = findRoot(i, p)
-		!if (root .ne. -1) then
-		!	do j=0, p-1
-		!		if (i == MOD(j*j*j+a*j + b)) then
-		!			points_x(i) = j
-		!			points_y(i) = root
-		!		end if
-		!	end do
-		!else if
-		!	points_x(i) = -1
-		!	points_y(i) = -1
-		!end if
-		!root = findRoot(i*i*i + a*i + b, p)
-		!if (root .ne. -1) then
-		!	points(i) = root
-		!	print *, "added", i
-		!else
-		!	points(i) = -1
-		!end if
 	end do
 
-	! Print points
-	!do i=0, p-1
-	!	if (points(i) .ne. -1) then
-	!		j = points(i)
-	!		print *, MOD(j*j*j + a*j + b,p), findRoot(j*j*j + a*j + b, p)
-	!	end if
-	!end do 
 	print *, "Found point: inf"
 end program elliptic
 
