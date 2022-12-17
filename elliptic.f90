@@ -5,7 +5,7 @@ program elliptic
 	integer :: p
 	integer :: a, b
 	integer :: numPoints
-	integer :: root, i,j,k,l, input, x1,y1,z1,x2,y2,z2,out_x,out_y,out_z
+	integer :: root, i,j,k,l, input, x1,y1,z1,x2,y2,z2,out_x,out_y,out_z,n
 	integer :: findRoot
 	integer, dimension (:), allocatable :: points_x, points_y, points_z
 
@@ -105,6 +105,30 @@ program elliptic
 			
 
 		else if (input==2) then
+			print '("Is the input point at infinity? (y/n)")'
+			read *, char
+			if(char=='y') then
+				x1=0
+				y1=1
+				z1=0
+			else if (char=='n') then
+				print '("Enter the coordinates of the point.")',
+				read *,x1,y1
+			else
+				print '("Error: Please enter either y or n.")'
+				exit
+			end if
+			print '("Enter the integer n.")'
+			read *, n
+
+			if (n < 0) then
+				print '("Error: Please enter a positive integer.")'
+			else
+				call pointMultiplication(x,y,z,n,a,b,p,out_x,out_y,out_z)
+				print '("(", I0, ",", I0, ",", I0, ") times ", I0, " is (",I0,",",I0,",",I0,").")' &
+					,x1,y1,z1,n,out_x,out_y,out_z
+			end if
+
 		else if (input == 3) then
 			print '("Closing.")',
 			stop
@@ -120,7 +144,45 @@ end program elliptic
 subroutine pointMultiplication(x,y,z,n,a,b,p,out_x,out_y,out_z)
 	implicit none
 
-	integer :: x,y,z,n,a,b,p,out_x,out_y,out_z
+	integer :: x,y,z,n,a,b,p,out_x,out_y,out_z, t_x,t_y,t_z
+	integer :: m
+
+	if (n < 0) then
+		m = -n
+	else
+		m = n
+	end if
+
+	out_x = x
+	out_y = y
+	out_z = z
+
+	do while (m .ne. 0)
+		if (MOD(m,2)==0) then  ! if m = 0 mod 2, add current point to itself
+			call addPoints(out_x,out_y,out_z,out_x,out_y,out_z,a,b,p,t_x,t_y,t_z)
+			out_x = t_x
+			out_y = t_y
+			out_z = t_z
+
+			m = m/2
+		else  ! if m = 1 mod 2, add current point to itself and then add P to it
+			call addPoints(out_x,out_y,out_z,out_x,out_y,out_z,a,b,p,t_x,t_y,t_z)
+			out_x = t_x
+			out_y = t_y
+			out_z = t_z
+
+			call addPoints(out_x,out_y,out_z,x,y,z,a,b,p,t_x,t_y,t_z)
+			out_x = t_x
+			out_y = t_y
+			out_z = t_z
+
+			m = (m-1)/2
+		end if
+	end do
+
+	if (n < 0 .and. out_z==1) then  ! if n is negative and output is not infinity, then flip the y-coordinate
+		out_y = -out_y
+	end if
 end subroutine pointMultiplication
 
 ! Adds two points P1=(x1,y1,z1) and P2=(x2,y2,z2), and stores the result in (out_x,out_y,out_z)
