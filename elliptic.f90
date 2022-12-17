@@ -6,7 +6,7 @@ program elliptic
 	integer :: a, b
 	integer :: numPoints
 	integer :: root, i,j,k,l, input, x1,y1,z1,x2,y2,z2,out_x,out_y,out_z,n
-	integer :: findRoot
+	integer :: findRoot, checkPoint
 	integer, dimension (:), allocatable :: points_x, points_y, points_z
 
 	print '("Enter the field (must be a prime not equal to 2 or 3)")',
@@ -54,8 +54,6 @@ program elliptic
 			end if
 		end do
 	end do
-
-	print '("done")'
 
 	print '("Total number of points: ",I0)', numPoints
 
@@ -114,6 +112,7 @@ program elliptic
 			else if (char=='n') then
 				print '("Enter the coordinates of the point.")',
 				read *,x1,y1
+				z1 = 1
 			else
 				print '("Error: Please enter either y or n.")'
 				exit
@@ -121,14 +120,9 @@ program elliptic
 			print '("Enter the integer n.")'
 			read *, n
 
-			if (n < 0) then
-				print '("Error: Please enter a positive integer.")'
-			else
-				call pointMultiplication(x,y,z,n,a,b,p,out_x,out_y,out_z)
-				print '("(", I0, ",", I0, ",", I0, ") times ", I0, " is (",I0,",",I0,",",I0,").")' &
-					,x1,y1,z1,n,out_x,out_y,out_z
-			end if
-
+			call pointMultiplication(x1,y1,z1,n,a,b,p,out_x,out_y,out_z)
+			print '("(", I0, ",", I0, ",", I0, ") times ", I0, " is (",I0,",",I0,",",I0,").")' &
+				,x1,y1,z1,n,out_x,out_y,out_z
 		else if (input == 3) then
 			print '("Closing.")',
 			stop
@@ -156,8 +150,11 @@ subroutine pointMultiplication(x,y,z,n,a,b,p,out_x,out_y,out_z)
 	out_x = x
 	out_y = y
 	out_z = z
+	t_x=x
+	t_y=y
+	t_z=z
 
-	do while (m .ne. 0)
+	do while (m >= 2)
 		if (MOD(m,2)==0) then  ! if m = 0 mod 2, add current point to itself
 			call addPoints(out_x,out_y,out_z,out_x,out_y,out_z,a,b,p,t_x,t_y,t_z)
 			out_x = t_x
@@ -165,6 +162,7 @@ subroutine pointMultiplication(x,y,z,n,a,b,p,out_x,out_y,out_z)
 			out_z = t_z
 
 			m = m/2
+			print '("Divided by 2")'
 		else  ! if m = 1 mod 2, add current point to itself and then add P to it
 			call addPoints(out_x,out_y,out_z,out_x,out_y,out_z,a,b,p,t_x,t_y,t_z)
 			out_x = t_x
@@ -177,11 +175,12 @@ subroutine pointMultiplication(x,y,z,n,a,b,p,out_x,out_y,out_z)
 			out_z = t_z
 
 			m = (m-1)/2
+			print '("Subtracted 1, Divided by 2")'
 		end if
 	end do
 
-	if (n < 0 .and. out_z==1) then  ! if n is negative and output is not infinity, then flip the y-coordinate
-		out_y = -out_y
+	if ((n < 0) .and. (out_z==1) .and. (out_y .ne. 0)) then  ! if n is negative and output is not infinity, then flip the y-coordinate
+		out_y = p-out_y
 	end if
 end subroutine pointMultiplication
 
@@ -202,18 +201,18 @@ subroutine addPoints(x1,y1,z1,x2,y2,z2,a,b,p,out_x,out_y,out_z)
 		out_y = y1
 		out_z = z1
 	! P1,P2 are not infinity from this point onwards
-	else if (x1==x2 .and. y1==-y2) then  ! if slope is vertical then return point at infinity
+	else if ((x1==x2) .and. ((y1==p-y2) .or. (y1==y2 .and. y1==0))) then  ! if slope is vertical then return point at infinity (change this for reals)
 		out_x = 0   
 		out_y = 1
 		out_z = 0
 	else if (x1 .ne. x2) then  ! addition when points are not equal
 		s = (y2-y1)/(x2-x1)
 
-		out_x = MOD((s**2) - x1-x2,p)
+		out_x = MOD((s**2) - x1-x2,p)  ! remove MOD for reals
 		out_y = MOD(s*(x1-out_x)-y1,p)
 		out_z = 1
 	else if (x1==x2 .and. y1==y2) then  ! addition when points are equal
-		s = (3*(x1**2)+a)/(2*y1)
+		s = (3*(x1**2)+a)/(2*y1)  ! Need to take inverse modulo p here!!!
 
 		out_x = MOD((s**2)-2*x1,p)
 		out_y = MOD(s*(x1-out_x)-y1,p)
@@ -246,3 +245,17 @@ function findRoot (x,p)
 		end if
 	end do
 end function findRoot
+
+! Checks if the point x,y is a point on the curve
+function checkPoint(x,y,a,b,p)
+	implicit none
+
+	integer :: x,y,a,b,p
+	integer :: checkPoint
+
+	if (MOD(y*y,p) == MOD(x*x*x + a*x + b,p)) then
+		checkPoint = 1
+	else 
+		checkPoint = 0
+	end if
+end function checkPoint
