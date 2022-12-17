@@ -115,7 +115,9 @@ subroutine pointMultiplication(x,y,z,n,a,b,out_x,out_y,out_z)
 
 	real :: x,y,z,a,b,out_x,out_y,out_z, t_x,t_y,t_z
 	integer :: n
-	integer :: m
+	integer :: m, len, i
+	real :: log2
+	integer, dimension (:), allocatable :: binary
 
 	if (n < 0) then
 		m = -n
@@ -130,8 +132,23 @@ subroutine pointMultiplication(x,y,z,n,a,b,out_x,out_y,out_z)
 	t_y=y
 	t_z=z
 
+	! Generate the binary representation of m
+	allocate(binary(2*INT(log2(REAL(m)))+1))
+	len=1
 	do while (m >= 2)
-		if (MOD(m,2)==0) then  ! if m = 0 mod 2, add current point to itself
+		if (MOD(m,2)==0) then
+			binary(len)=0
+			m = m/2
+		else
+			binary(len)=1
+			m = (m-1)/2
+		end if
+		len=len+1
+	end do
+
+	! Traverse the generated binary representation in reverse
+	do i=1,len-1
+		if (binary(len-i)==0) then  ! if m = 0 mod 2, add current point to itself
 			call addPoints(out_x,out_y,out_z,out_x,out_y,out_z,a,b,t_x,t_y,t_z)
 			out_x = t_x
 			out_y = t_y
@@ -212,3 +229,10 @@ function checkPoint(x,y,a,b)
 		checkPoint = 0
 	end if
 end function checkPoint
+
+real function log2(x)
+  implicit none
+  real, intent(in) :: x
+
+  log2 = log(x) / log(2.)
+end function
