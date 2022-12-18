@@ -148,15 +148,15 @@ subroutine pointMultiplication(x,y,z,n,a,b,out_x,out_y,out_z)
 
 	! Traverse the generated binary representation in reverse
 	do i=1,len-1
-		if (binary(len-i)==0) then  ! if m = 0 mod 2, add current point to itself
+		if (binary(len-i)==0) then  ! if the i-th bit is 0, add current point to itself
 			call addPoints(out_x,out_y,out_z,out_x,out_y,out_z,a,b,t_x,t_y,t_z)
 			out_x = t_x
 			out_y = t_y
 			out_z = t_z
 
 			m = m/2
-			print '("Divided by 2")'
-		else  ! if m = 1 mod 2, add current point to itself and then add P to it
+			print '("Doubled.")'
+		else  ! if the i-th bit is 1, add current point to itself and then add P to it
 			call addPoints(out_x,out_y,out_z,out_x,out_y,out_z,a,b,t_x,t_y,t_z)
 			out_x = t_x
 			out_y = t_y
@@ -168,7 +168,7 @@ subroutine pointMultiplication(x,y,z,n,a,b,out_x,out_y,out_z)
 			out_z = t_z
 
 			m = (m-1)/2
-			print '("Subtracted 1, Divided by 2")'
+			print '("Doubled and added.")'
 		end if
 	end do
 
