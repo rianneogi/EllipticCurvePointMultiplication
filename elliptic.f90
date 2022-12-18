@@ -83,6 +83,11 @@ program elliptic
 				exit
 			end if
 
+			if (checkPoint(x1,y1,a,b,p) == 0) then
+				print '("Error: This is not a point on the curve.")'
+				exit
+			end if
+
 			print '("Is the second point at infinity? (y/n)")',
 			read *, char
 			if(char=='y') then
@@ -95,6 +100,11 @@ program elliptic
 				z2 = 1
 			else
 				print '("Error: Please enter either y or n.")'
+				exit
+			end if
+
+			if (checkPoint(x2,y2,a,b,p) == 0) then
+				print '("Error: This is not a point on the curve.")'
 				exit
 			end if
 
@@ -118,6 +128,12 @@ program elliptic
 				print '("Error: Please enter either y or n.")'
 				exit
 			end if
+
+			if (checkPoint(x1,y1,a,b,p) == 0) then
+				print '("Error: This is not a point on the curve.")'
+				exit
+			end if
+
 			print '("Enter the integer n.")'
 			read *, n
 
@@ -231,13 +247,13 @@ subroutine addPoints(x1,y1,z1,x2,y2,z2,a,b,p,out_x,out_y,out_z)
 		out_y = 1
 		out_z = 0
 	else if (x1 .ne. x2) then  ! addition when points are not equal
-		s = (y2-y1)*inv(x2-x1,p)
+		s = MOD((y2-y1)*inv(x2-x1,p),p)
 
 		out_x = MOD((s**2) - x1-x2,p) 
 		out_y = MOD(s*(x1-out_x)-y1,p)
 		out_z = 1
 	else if (x1==x2 .and. y1==y2) then  ! addition when points are equal
-		s = (3*(x1**2)+a)*inv(2*y1,p)  ! Need to take inverse modulo p here
+		s = MOD((3*(x1**2)+a)*inv(2*y1,p),p)  ! Need to take inverse modulo p here
 
 		out_x = MOD((s**2)-2*x1,p)
 		out_y = MOD(s*(x1-out_x)-y1,p)
@@ -264,7 +280,10 @@ function inv(x,p)
 	integer :: inv
 	integer :: r,s,t,old_r,old_s,old_t,q,tmp_r,tmp_t,tmp_s
 
-	old_r = x
+	old_r = MOD(x,p)
+	if (old_r < 0) then
+		old_r = old_r+p
+	end if
 	r = p
 	old_s = 1
 	s = 0
