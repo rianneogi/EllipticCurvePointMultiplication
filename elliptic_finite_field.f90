@@ -68,42 +68,20 @@ program elliptic
 		read *, input
 
 		if (input==1) then
-			print '("Is the first point at infinity? (y/n)")',
-			read *, char
-			if(char=='y') then
-				x1=0
-				y1=1
-				z1=0
-			else if (char=='n') then
-				print '("Enter the coordinates of the first point.")',
-				read *, x1,y1
-				z1 = 1
-			else
-				print '("Error: Please enter either y or n.")',
-				exit
-			end if
-
-			if (checkPoint(x1,y1,a,b,p) == 0) then
+			print '("Enter the x,y,z-coordinates of the first point. &
+				The z-coordinate denotes whether the point is at infinity -- following the convention from sage.")',
+			read *,x1,y1,z1
+			
+			if (checkPoint(x1,y1,z1,a,b,p) == 0) then
 				print '("Error: This is not a point on the curve.")'
 				exit
 			end if
 
-			print '("Is the second point at infinity? (y/n)")',
-			read *, char
-			if(char=='y') then
-				x2=0
-				y2=1
-				z2=0
-			else if (char=='n') then
-				print '("Enter the coordinates of the second point.")',
-				read *, x2,y2
-				z2 = 1
-			else
-				print '("Error: Please enter either y or n.")'
-				exit
-			end if
-
-			if (checkPoint(x2,y2,a,b,p) == 0) then
+			print '("Enter the x,y,z-coordinates of the second point. &
+				The z-coordinate denotes whether the point is at infinity -- following the convention from sage.")',
+			read *,x2,y2,z2
+			
+			if (checkPoint(x2,y2,z2,a,b,p) == 0) then
 				print '("Error: This is not a point on the curve.")'
 				exit
 			end if
@@ -114,22 +92,11 @@ program elliptic
 			
 
 		else if (input==2) then
-			print '("Is the input point at infinity? (y/n)")'
-			read *, char
-			if(char=='y') then
-				x1=0
-				y1=1
-				z1=0
-			else if (char=='n') then
-				print '("Enter the coordinates of the point.")',
-				read *,x1,y1
-				z1 = 1
-			else
-				print '("Error: Please enter either y or n.")'
-				exit
-			end if
-
-			if (checkPoint(x1,y1,a,b,p) == 0) then
+			print '("Enter the x,y,z-coordinates of the point. &
+				The z-coordinate denotes whether the point is at infinity -- following the convention from sage.")',
+			read *,x1,y1,z1
+			
+			if (checkPoint(x1,y1,z1,a,b,p) == 0) then
 				print '("Error: This is not a point on the curve.")'
 				exit
 			end if
@@ -328,15 +295,25 @@ function findRoot (x,p)
 end function findRoot
 
 ! Checks if the point x,y is a point on the curve
-function checkPoint(x,y,a,b,p)
+function checkPoint(x,y,z,a,b,p)
 	implicit none
 
-	integer :: x,y,a,b,p
+	integer :: x,y,z,a,b,p
 	integer :: checkPoint
 
-	if (MOD(y*y,p) == MOD(x*x*x + a*x + b,p)) then
-		checkPoint = 1
-	else 
+	if (z==0) then
+		if (x==0 .and. y==1) then
+			checkPoint = 1
+		else
+			checkPoint = 0
+		end if
+	else if (z==1) then
+		if (MOD(y*y,p) == MOD(x*x*x + a*x + b,p)) then
+			checkPoint = 1
+		else 
+			checkPoint = 0
+		end if
+	else ! z!=0 and z!=1
 		checkPoint = 0
 	end if
 end function checkPoint
