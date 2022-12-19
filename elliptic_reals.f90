@@ -137,7 +137,7 @@ subroutine pointMultiplication(x,y,z,n,a,b,out_x,out_y,out_z)
 		end if
 	end do
 
-	if (n < 0 .and. out_z==1) then  ! if n is negative and output is not infinity, then flip the y-coordinate
+	if (n < 0 .and. out_z==1) then  ! if n is negative and output is not the point at infinity, then flip the y-coordinate
 		out_y = -out_y
 	end if
 end subroutine pointMultiplication
@@ -188,13 +188,13 @@ function checkPoint(x,y,z,a,b)
 	real :: x,y,z,a,b
 	integer :: checkPoint
 
-	if (z==0) then
+	if (z==0) then  ! if z is 0 then this must be the point at infinity
 		if (x==0 .and. y==1) then
 			checkPoint = 1
 		else
 			checkPoint = 0
 		end if
-	else if (z==1) then
+	else if (z==1) then ! otherwise check if RHS is equal to LHS of the Elliptic curve
 		if (y*y == x*x*x + a*x + b) then
 			checkPoint = 1
 		else 
